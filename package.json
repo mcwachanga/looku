@@ -43,7 +43,6 @@
     "prisma": "^6.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^4.1.18",
     "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
@@ -54,9 +53,11 @@
     "@types/node": "^22.2.0",
     "@types/react": "^18.2.31",
     "@types/react-dom": "^18.2.14",
+    "autoprefixer": "^10.4.24",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^10.0.1",
     "prettier": "^3.2.4",
+    "tailwindcss": "^4.1.18",
     "typescript": "^5.2.2",
     "vite": "^6.2.2"
   },
