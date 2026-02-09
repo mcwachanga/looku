@@ -43,9 +43,6 @@ model Customer {
   bodyProfiles CustomerBodyProfile[]
   scanSessions ScanSession[]
   sessions     CustomerSession[]
-
-  @@index([userToken])
-  @@index([email])
 }
 
 model CustomerSession {
