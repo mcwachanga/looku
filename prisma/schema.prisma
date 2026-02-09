@@ -30,36 +30,10 @@ model Session {
   refreshTokenExpires DateTime?
 }
 
-model Customer {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  shop         String
-  userToken    String?       @unique // Optional for guests, unique for lookup
-  firstName    String?
-  lastName     String?
-  email        String?       @unique // Optional initially, required for auth accounts
-  passwordHash String?       // Required only for auth accounts
-  createdAt    DateTime      @default(now())
-  
-  bodyProfiles CustomerBodyProfile[]
-  scanSessions ScanSession[]
-  sessions     CustomerSession[]
-}
-
-model CustomerSession {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  customerId String   @db.ObjectId
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  token      String   @unique
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-}
-
 model CustomerBodyProfile {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  
-  customerId   String        @db.ObjectId
-  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
+  shop         String
+  userToken    String
   heightCm     Float
   measurements Json
   photos       Json?
@@ -69,15 +43,14 @@ model CustomerBodyProfile {
   createdAt    DateTime      @default(now())
   
   scanSessions ScanSession[]
+
+  @@index([userToken])
 }
 
 model ScanSession {
   id                String              @id @default(auto()) @map("_id") @db.ObjectId
   shop              String
   productId         String
-  
-  customerId        String              @db.ObjectId
-  customer          Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
   
   customerProfileId String              @db.ObjectId
   customerProfile   CustomerBodyProfile @relation(fields: [customerProfileId], references: [id])
