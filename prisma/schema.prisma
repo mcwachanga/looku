@@ -5,16 +5,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
-  id                  String    @id
+  id                  String    @id @map("_id")
   shop                String
   state               String
   isOnline            Boolean   @default(false)
@@ -31,4 +28,72 @@ model Session {
   emailVerified       Boolean?  @default(false)
   refreshToken        String?
   refreshTokenExpires DateTime?
+}
+
+model Customer {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  shop         String
+  userToken    String?       @unique // Optional for guests, unique for lookup
+  firstName    String?
+  lastName     String?
+  email        String?       @unique // Optional initially, required for auth accounts
+  passwordHash String?       // Required only for auth accounts
+  createdAt    DateTime      @default(now())
+  
+  bodyProfiles CustomerBodyProfile[]
+  scanSessions ScanSession[]
+  sessions     CustomerSession[]
+
+  @@index([userToken])
+  @@index([email])
+}
+
+model CustomerSession {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
+model CustomerBodyProfile {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  
+  customerId   String        @db.ObjectId
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  heightCm     Float
+  measurements Json
+  photos       Json?
+  
+  isActive     Boolean       @default(true)
+  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime      @default(now())
+  
+  scanSessions ScanSession[]
+}
+
+model ScanSession {
+  id                String              @id @default(auto()) @map("_id") @db.ObjectId
+  shop              String
+  productId         String
+  
+  customerId        String              @db.ObjectId
+  customer          Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  customerProfileId String              @db.ObjectId
+  customerProfile   CustomerBodyProfile @relation(fields: [customerProfileId], references: [id])
+  
+  recommendedSize   String?
+  feedback          String?
+  createdAt         DateTime            @default(now())
+}
+
+model SizeProfile {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  shop         String
+  name         String
+  generic      Boolean @default(true)
+  measurements Json
 }
